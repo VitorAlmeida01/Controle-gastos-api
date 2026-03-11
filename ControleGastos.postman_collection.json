@@ -1,0 +1,265 @@
+{
+  "info": {
+    "name": "ControleGastos API",
+    "description": "Collection completa da API de Controle de Gastos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "userEmail",
+      "value": "joao@example.com",
+      "type": "string"
+    },
+    {
+      "key": "userPass",
+      "value": "senha123",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{userEmail}}",
+        "type": "string"
+      },
+      {
+        "key": "password",
+        "value": "{{userPass}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth (JWT)",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"senha\": \"{{userPass}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Validar Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "validate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Registrar Usuario",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "usuarios", "register"]
+            }
+          }
+        },
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "usuarios"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gastos",
+      "item": [
+        {
+          "name": "Criar Gasto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": 150.50,\n  \"categoria\": {\n    \"id\": \"{{categoriaId}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/gastos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gastos"]
+            }
+          }
+        },
+        {
+          "name": "Listar Gastos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/gastos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gastos"]
+            }
+          }
+        },
+        {
+          "name": "Buscar Gasto por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/gastos/{{gastoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gastos", "{{gastoId}}"]
+            }
+          }
+        },
+        {
+          "name": "Buscar Gastos por Tipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/gastos/tipo/MERCADO",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gastos", "tipo", "MERCADO"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Gasto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": 200.00,\n  \"categoria\": {\n    \"id\": \"{{categoriaId}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/gastos/{{gastoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gastos", "{{gastoId}}"]
+            }
+          }
+        },
+        {
+          "name": "Deletar Gasto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/gastos/{{gastoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gastos", "{{gastoId}}"]
+            }
+          }
+        },
+        {
+          "name": "Calcular Total",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/gastos/total",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gastos", "total"]
+            }
+          }
+        },
+        {
+          "name": "Calcular Total por Tipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/gastos/total/tipo/MERCADO",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gastos", "total", "tipo", "MERCADO"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar Categorias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
