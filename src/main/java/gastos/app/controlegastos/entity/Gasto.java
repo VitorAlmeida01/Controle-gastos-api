@@ -25,6 +25,8 @@ public class Gasto {
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
+    private String descricao;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;

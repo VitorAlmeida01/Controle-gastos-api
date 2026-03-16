@@ -13,5 +13,5 @@ public class GastoRequestDto {
 
     private UUID categoriaId;
     private Double valor;
+    private String descricao;
 }
-

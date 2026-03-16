@@ -41,7 +41,7 @@ public class GastoController {
             // Buscar apenas gastos do usuário logado
             List<Gasto> gastos = gastoService.listarPorUsuario(usuario.getId());
             List<GastoResponseDto> response = gastos.stream()
-                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao()))
+                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao(), g.getDescricao()))
                     .toList();
             return ResponseEntity.ok(response);
 
@@ -63,7 +63,7 @@ public class GastoController {
 
             // Buscar gasto e validar se pertence ao usuário
             return gastoService.buscarPorIdEUsuario(id, usuario.getId())
-                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao()))
+                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao(), g.getDescricao()))
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
 
@@ -86,7 +86,7 @@ public class GastoController {
             // Buscar gastos do usuário filtrados por tipo
             List<Gasto> gastos = gastoService.buscarPorTipoEUsuario(tipo, usuario.getId());
             List<GastoResponseDto> response = gastos.stream()
-                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao()))
+                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao(), g.getDescricao()))
                     .toList();
             return ResponseEntity.ok(response);
 
@@ -107,7 +107,7 @@ public class GastoController {
 
             List<Gasto> gastos = gastoService.buscarGastosDoDia(usuario.getId());
             List<GastoResponseDto> response = gastos.stream()
-                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao()))
+                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao(), g.getDescricao()))
                     .toList();
 
             Double total = gastos.stream().mapToDouble(Gasto::getValor).sum();
@@ -133,7 +133,7 @@ public class GastoController {
 
             List<Gasto> gastos = gastoService.buscarGastosDaSemana(usuario.getId());
             List<GastoResponseDto> response = gastos.stream()
-                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao()))
+                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao(), g.getDescricao()))
                     .toList();
 
             Double total = gastos.stream().mapToDouble(Gasto::getValor).sum();
@@ -159,7 +159,7 @@ public class GastoController {
 
             List<Gasto> gastos = gastoService.buscarGastosDoMes(usuario.getId());
             List<GastoResponseDto> response = gastos.stream()
-                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao()))
+                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao(), g.getDescricao()))
                     .toList();
 
             Double total = gastos.stream().mapToDouble(Gasto::getValor).sum();
@@ -185,7 +185,7 @@ public class GastoController {
 
             List<Gasto> gastos = gastoService.buscarGastosDosUltimos6Meses(usuario.getId());
             List<GastoResponseDto> response = gastos.stream()
-                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao()))
+                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao(), g.getDescricao()))
                     .toList();
 
             Double total = gastos.stream().mapToDouble(Gasto::getValor).sum();
@@ -211,7 +211,7 @@ public class GastoController {
 
             List<Gasto> gastos = gastoService.buscarGastosDoAno(usuario.getId());
             List<GastoResponseDto> response = gastos.stream()
-                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao()))
+                    .map(g -> new GastoResponseDto(g.getId(), g.getValor(), g.getCategoria().getTipo(), g.getDtCriacao(), g.getDescricao()))
                     .toList();
 
             Double total = gastos.stream().mapToDouble(Gasto::getValor).sum();
@@ -230,37 +230,32 @@ public class GastoController {
     @PostMapping
     public ResponseEntity<?> criar(@RequestBody GastoRequestDto gastoDto) {
         try {
-            // Obter usuário autenticado
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String email = authentication.getName();
 
             Usuario usuario = usuarioService.buscarPorEmail(email)
                     .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-            // Buscar categoria por ID e validar se pertence ao usuário
             Categoria categoria = categoriaService.buscarCategoriaPorIdEUsuario(
-                    gastoDto.getCategoriaId(),
-                    usuario
-            );
+                    gastoDto.getCategoriaId(), usuario);
 
-            // Criar gasto e associar ao usuário
             Gasto gasto = new Gasto();
             gasto.setValor(gastoDto.getValor());
             gasto.setCategoria(categoria);
-            gasto.setUsuario(usuario); // ✅ Associar ao usuário logado
+            gasto.setUsuario(usuario);
+            gasto.setDescricao(gastoDto.getDescricao());
 
             Gasto novoGasto = gastoService.salvar(gasto);
 
-            // Criar resposta DTO
             GastoResponseDto response = new GastoResponseDto(
                 novoGasto.getId(),
                 novoGasto.getValor(),
                 novoGasto.getCategoria().getTipo(),
-                novoGasto.getDtCriacao()
+                novoGasto.getDtCriacao(),
+                novoGasto.getDescricao()
             );
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(java.util.Map.of("erro", e.getMessage()));
@@ -273,40 +268,33 @@ public class GastoController {
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizar(@PathVariable UUID id, @RequestBody GastoRequestDto gastoDto) {
         try {
-            // Obter usuário autenticado
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String email = authentication.getName();
 
             Usuario usuario = usuarioService.buscarPorEmail(email)
                     .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-            // Buscar gasto existente e validar se pertence ao usuário
             Gasto gastoExistente = gastoService.buscarPorIdEUsuario(id, usuario.getId())
                     .orElseThrow(() -> new RuntimeException("Gasto não encontrado ou não pertence ao usuário"));
 
-            // Buscar categoria por ID e validar se pertence ao usuário
             Categoria categoria = categoriaService.buscarCategoriaPorIdEUsuario(
-                    gastoDto.getCategoriaId(),
-                    usuario
-            );
+                    gastoDto.getCategoriaId(), usuario);
 
-            // Atualizar gasto
             gastoExistente.setValor(gastoDto.getValor());
             gastoExistente.setCategoria(categoria);
-            // gastoExistente.setUsuario() não precisa atualizar pois já está associado
+            gastoExistente.setDescricao(gastoDto.getDescricao());
 
             Gasto gastoAtualizado = gastoService.salvar(gastoExistente);
 
-            // Criar resposta DTO
             GastoResponseDto response = new GastoResponseDto(
                 gastoAtualizado.getId(),
                 gastoAtualizado.getValor(),
                 gastoAtualizado.getCategoria().getTipo(),
-                gastoAtualizado.getDtCriacao()
+                gastoAtualizado.getDtCriacao(),
+                gastoAtualizado.getDescricao()
             );
 
             return ResponseEntity.ok(response);
-
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(java.util.Map.of("erro", e.getMessage()));

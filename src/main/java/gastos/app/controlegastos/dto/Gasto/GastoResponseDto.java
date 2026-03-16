@@ -15,4 +15,5 @@ public class GastoResponseDto {
     private Double valor;
     private String tipo;
     private LocalDateTime dtCriacao;
+    private String descricao;
 }
