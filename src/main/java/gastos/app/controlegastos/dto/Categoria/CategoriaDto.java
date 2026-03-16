@@ -1,8 +1,5 @@
 package gastos.app.controlegastos.dto.Categoria;
 
-import gastos.app.controlegastos.enums.CategoriaEnum;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoriaDto {
-    @Enumerated(EnumType.STRING)
-    private CategoriaEnum tipo;
+    private String tipo;
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import gastos.app.controlegastos.enums.CategoriaEnum;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,12 +19,16 @@ public class Categoria {
     @Id
     @GeneratedValue
     private UUID id;
-    @Enumerated(EnumType.STRING)
-    private CategoriaEnum tipo;
+
+    @Column(nullable = false)
+    private String tipo;
+
     private LocalDate dtCriacao = LocalDate.now();
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Gasto> gastos = new ArrayList<>();
 }

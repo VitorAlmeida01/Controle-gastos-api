@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/api/auth")
+    @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -45,8 +45,13 @@ public class AuthController {
             Usuario usuario = usuarioService.buscarPorEmail(loginRequest.getEmail())
                     .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-            // Gerar token JWT (inclui nome do usuário nas claims)
-            final String jwt = jwtUtil.generateToken(userDetails);
+            // Gerar token JWT incluindo ID, nome, email e roles nas claims
+            final String jwt = jwtUtil.generateToken(
+                userDetails,
+                usuario.getId().toString(),
+                usuario.getNome(),
+                usuario.getEmail()
+            );
 
             // Criar resposta
             LoginResponse response = new LoginResponse(jwt, usuario.getEmail(), usuario.getNome());
@@ -77,6 +82,34 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado");
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getTokenInfo(@RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+
+                // Extrair informações do token
+                String id = jwtUtil.extractId(token);
+                String email = jwtUtil.extractEmail(token);
+                String nome = jwtUtil.extractNome(token);
+                java.util.List<String> roles = jwtUtil.extractRoles(token);
+
+                // Criar resposta com as informações
+                java.util.Map<String, Object> userInfo = new java.util.HashMap<>();
+                userInfo.put("id", id);
+                userInfo.put("email", email);
+                userInfo.put("nome", nome);
+                userInfo.put("roles", roles);
+
+                return ResponseEntity.ok(userInfo);
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token não fornecido");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Erro ao extrair informações do token: " + e.getMessage());
         }
     }
 }

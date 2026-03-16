@@ -1,10 +1,10 @@
 package gastos.app.controlegastos.dto.Gasto;
 
-import gastos.app.controlegastos.enums.CategoriaEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -13,6 +13,6 @@ import java.util.UUID;
 public class GastoResponseDto {
     private UUID id;
     private Double valor;
-    private CategoriaEnum tipo;
+    private String tipo;
+    private LocalDateTime dtCriacao;
 }
-
