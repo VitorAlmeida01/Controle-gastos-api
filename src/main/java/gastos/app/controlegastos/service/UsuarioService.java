@@ -62,4 +62,25 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
+    public UsuarioResponseDto atualizar(UUID id, UsuarioRequestDto dto){
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
+
+        if (dto.getNome() != null) usuario.setNome(dto.getNome());
+        if (dto.getEmail() != null) usuario.setEmail(dto.getEmail());
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
+
+        Usuario salvo = usuarioRepository.save(usuario);
+        return UsuarioMapper.toResponse(salvo);
+    }
+
+    public void deletar(UUID id){
+        if (!usuarioRepository.existsById(id)){
+            throw new RuntimeException("Usuário não encontrado com id: " + id);
+        }
+        usuarioRepository.deleteById(id);
+    }
+
 }
