@@ -1,5 +1,7 @@
 package gastos.app.controlegastos.controller;
 
+import gastos.app.controlegastos.dto.Analytics.AvgCategoriaDto;
+import gastos.app.controlegastos.dto.Analytics.SeasonalityDto;
 import gastos.app.controlegastos.dto.Gasto.GastoRequestDto;
 import gastos.app.controlegastos.dto.Gasto.GastoResponseDto;
 import gastos.app.controlegastos.entity.Categoria;
@@ -364,6 +366,73 @@ public class GastoController {
             Double total = gastoService.calcularTotalPorTipoEUsuario(tipo, usuario.getId());
             return ResponseEntity.ok(total);
 
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("erro", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/analytics/media-categoria")
+    public ResponseEntity<?> mediaPorCategoria(@RequestParam(name = "scope", defaultValue = "usuario") String scope) {
+        try {
+            UUID usuarioId = null;
+            if ("usuario".equalsIgnoreCase(scope)) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String email = authentication.getName();
+                Usuario usuario = usuarioService.buscarPorEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                usuarioId = usuario.getId();
+            }
+
+            List<AvgCategoriaDto> response = gastoService.mediaPorCategoria(usuarioId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("erro", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/analytics/ticket-medio")
+    public ResponseEntity<?> ticketMedio(@RequestParam(name = "scope", defaultValue = "usuario") String scope) {
+        try {
+            UUID usuarioId = null;
+            if ("usuario".equalsIgnoreCase(scope)) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String email = authentication.getName();
+                Usuario usuario = usuarioService.buscarPorEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                usuarioId = usuario.getId();
+            }
+
+            Double response = gastoService.ticketMedio(usuarioId);
+            return ResponseEntity.ok(java.util.Map.of("ticketMedio", response));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("erro", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/analytics/sazonalidade")
+    public ResponseEntity<?> sazonalidade(
+            @RequestParam(name = "granularidade", defaultValue = "mes") String granularidade,
+            @RequestParam(name = "scope", defaultValue = "usuario") String scope) {
+        try {
+            UUID usuarioId = null;
+            if ("usuario".equalsIgnoreCase(scope)) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String email = authentication.getName();
+                Usuario usuario = usuarioService.buscarPorEmail(email)
+                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                usuarioId = usuario.getId();
+            }
+
+            if ("dia-semana".equalsIgnoreCase(granularidade)) {
+                List<SeasonalityDto> response = gastoService.sazonalidadePorDiaSemana(usuarioId);
+                return ResponseEntity.ok(response);
+            }
+
+            List<SeasonalityDto> response = gastoService.sazonalidadePorMes(usuarioId);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(java.util.Map.of("erro", e.getMessage()));

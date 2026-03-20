@@ -33,4 +33,49 @@ public interface GastoRepository extends JpaRepository<Gasto, UUID> {
     // Buscar gastos por período e usuário (CORRIGIDO para usar g.usuario.id)
     @Query("SELECT g FROM Gasto g WHERE g.usuario.id = :usuarioId AND g.dtCriacao BETWEEN :inicio AND :fim ORDER BY g.dtCriacao DESC")
     List<Gasto> findByUsuarioAndPeriodo(@Param("usuarioId") UUID usuarioId, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+
+    // Media por categoria (todos os usuarios)
+    @Query("SELECT g.categoria.tipo, AVG(g.valor) FROM Gasto g GROUP BY g.categoria.tipo")
+    List<Object[]> avgValorPorCategoria();
+
+    // Media por categoria (usuario)
+    @Query("SELECT g.categoria.tipo, AVG(g.valor) FROM Gasto g WHERE g.usuario.id = :usuarioId GROUP BY g.categoria.tipo")
+    List<Object[]> avgValorPorCategoriaUsuario(@Param("usuarioId") UUID usuarioId);
+
+    // Ticket medio (todos os usuarios)
+    @Query("SELECT AVG(g.valor) FROM Gasto g")
+    Double avgTicket();
+
+    // Ticket medio (usuario)
+    @Query("SELECT AVG(g.valor) FROM Gasto g WHERE g.usuario.id = :usuarioId")
+    Double avgTicketUsuario(@Param("usuarioId") UUID usuarioId);
+
+    // Sazonalidade por mes (todos os usuarios)
+    @Query("SELECT FUNCTION('YEAR', g.dtCriacao), FUNCTION('MONTH', g.dtCriacao), SUM(g.valor), COUNT(g) " +
+            "FROM Gasto g " +
+            "GROUP BY FUNCTION('YEAR', g.dtCriacao), FUNCTION('MONTH', g.dtCriacao) " +
+            "ORDER BY FUNCTION('YEAR', g.dtCriacao), FUNCTION('MONTH', g.dtCriacao)")
+    List<Object[]> seasonalityByMonth();
+
+    // Sazonalidade por mes (usuario)
+    @Query("SELECT FUNCTION('YEAR', g.dtCriacao), FUNCTION('MONTH', g.dtCriacao), SUM(g.valor), COUNT(g) " +
+            "FROM Gasto g WHERE g.usuario.id = :usuarioId " +
+            "GROUP BY FUNCTION('YEAR', g.dtCriacao), FUNCTION('MONTH', g.dtCriacao) " +
+            "ORDER BY FUNCTION('YEAR', g.dtCriacao), FUNCTION('MONTH', g.dtCriacao)")
+    List<Object[]> seasonalityByMonthUsuario(@Param("usuarioId") UUID usuarioId);
+
+    // Sazonalidade por dia da semana (todos os usuarios)
+    @Query("SELECT FUNCTION('DAY_OF_WEEK', g.dtCriacao), SUM(g.valor), COUNT(g) " +
+            "FROM Gasto g " +
+            "GROUP BY FUNCTION('DAY_OF_WEEK', g.dtCriacao) " +
+            "ORDER BY FUNCTION('DAY_OF_WEEK', g.dtCriacao)")
+    List<Object[]> seasonalityByDayOfWeek();
+
+    // Sazonalidade por dia da semana (usuario)
+    @Query("SELECT FUNCTION('DAY_OF_WEEK', g.dtCriacao), SUM(g.valor), COUNT(g) " +
+            "FROM Gasto g " +
+            "WHERE g.usuario.id = :usuarioId " +
+            "GROUP BY FUNCTION('DAY_OF_WEEK', g.dtCriacao) " +
+            "ORDER BY FUNCTION('DAY_OF_WEEK', g.dtCriacao)")
+    List<Object[]> seasonalityByDayOfWeekUsuario(@Param("usuarioId") UUID usuarioId);
 }

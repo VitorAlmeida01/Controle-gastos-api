@@ -1,5 +1,7 @@
 package gastos.app.controlegastos.service;
 
+import gastos.app.controlegastos.dto.Analytics.AvgCategoriaDto;
+import gastos.app.controlegastos.dto.Analytics.SeasonalityDto;
 import gastos.app.controlegastos.entity.Gasto;
 import gastos.app.controlegastos.repository.GastoRepository;
 import lombok.RequiredArgsConstructor;
@@ -133,5 +135,58 @@ public class GastoService {
         return gastoRepository.findByUsuarioAndPeriodo(usuarioId, inicio, fim).stream()
                 .mapToDouble(Gasto::getValor)
                 .sum();
+    }
+
+    public List<AvgCategoriaDto> mediaPorCategoria(UUID usuarioId) {
+        List<Object[]> rows = (usuarioId == null)
+                ? gastoRepository.avgValorPorCategoria()
+                : gastoRepository.avgValorPorCategoriaUsuario(usuarioId);
+
+        return rows.stream()
+                .map(r -> new AvgCategoriaDto(
+                        (String) r[0],
+                        r[1] == null ? 0.0 : ((Number) r[1]).doubleValue()
+                ))
+                .toList();
+    }
+
+    public Double ticketMedio(UUID usuarioId) {
+        Double avg = (usuarioId == null)
+                ? gastoRepository.avgTicket()
+                : gastoRepository.avgTicketUsuario(usuarioId);
+        return avg == null ? 0.0 : avg;
+    }
+
+    public List<SeasonalityDto> sazonalidadePorMes(UUID usuarioId) {
+        List<Object[]> rows = (usuarioId == null)
+                ? gastoRepository.seasonalityByMonth()
+                : gastoRepository.seasonalityByMonthUsuario(usuarioId);
+
+        return rows.stream()
+                .map(r -> {
+                    Integer year = ((Number) r[0]).intValue();
+                    Integer month = ((Number) r[1]).intValue();
+                    String periodo = String.format("%04d-%02d", year, month);
+                    Double total = r[2] == null ? 0.0 : ((Number) r[2]).doubleValue();
+                    Long qtd = r[3] == null ? 0L : ((Number) r[3]).longValue();
+                    return new SeasonalityDto(periodo, total, qtd);
+                })
+                .toList();
+    }
+
+    public List<SeasonalityDto> sazonalidadePorDiaSemana(UUID usuarioId) {
+        List<Object[]> rows = (usuarioId == null)
+                ? gastoRepository.seasonalityByDayOfWeek()
+                : gastoRepository.seasonalityByDayOfWeekUsuario(usuarioId);
+
+        return rows.stream()
+                .map(r -> {
+                    Integer dayOfWeek = ((Number) r[0]).intValue();
+                    String periodo = String.valueOf(dayOfWeek);
+                    Double total = r[1] == null ? 0.0 : ((Number) r[1]).doubleValue();
+                    Long qtd = r[2] == null ? 0L : ((Number) r[2]).longValue();
+                    return new SeasonalityDto(periodo, total, qtd);
+                })
+                .toList();
     }
 }
